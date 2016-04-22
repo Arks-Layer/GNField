@@ -12,25 +12,56 @@
 '------------------------------------------------------------------------------
 Imports System.Globalization
 Imports System.IO
+Imports System.Reflection
 Imports System.Runtime.InteropServices
 Imports System.Threading
 Imports Microsoft.Win32
 
 Public Class Form1
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Dim asm As Assembly = Assembly.GetExecutingAssembly()
+        Dim fi As New FileInfo(asm.Location)
+        Me.Visible = False
+        Me.Hide()
+        Me.Opacity = 0
+        Me.ShowInTaskbar = False
+        Me.FormBorderStyle = FormBorderStyle.SizableToolWindow
+        ToolStripTextBox1.Text = "Built: " & fi.LastWriteTime.ToString.Replace("/2016", "/16")
         Hide()
+        If File.Exists("PSO2 Tweaker.donotdetectmegameguardsenpaipls") = True And File.Exists("PSO2 Tweaker.exe") = False Then
+            NotifyIcon1.ShowBalloonTip(2000, "GN Shield", "Found a renamed Tweaker, fixing it now!", ToolTipIcon.Info)
+            Try
+                File.Copy("PSO2 Tweaker.donotdetectmegameguardsenpaipls", "PSO2 Tweaker.exe", True)
+                Thread.Sleep(2000)
+                File.Delete("PSO2 Tweaker.donotdetectmegameguardsenpaipls")
+            Catch ex As Exception
+                MsgBox("Error - " & ex.Message)
+            End Try
+            End
+        End If
+        If File.Exists("PSO2 Tweaker.donotnoticemegameguardsenpaipls") = True And File.Exists("PSO2 Tweaker.exe") = False Then
+            NotifyIcon1.ShowBalloonTip(2000, "GN Shield", "Found a renamed Tweaker, fixing it now!", ToolTipIcon.Info)
+            Try
+                File.Copy("PSO2 Tweaker.donotnoticemegameguardsenpaipls", "PSO2 Tweaker.exe", True)
+                Thread.Sleep(2000)
+                File.Delete("PSO2 Tweaker.donotnoticemegameguardsenpaipls")
+            Catch ex As Exception
+                MsgBox("Error - " & ex.Message)
+            End Try
+            End
+        End If
         If File.Exists("PSO2 Tweaker.exe") = False Then
             MsgBox("GN Field establishment failed! Insufficient GN particles!" & vbCrLf & vbCrLf & "This program should not be run by itself, the PSO2 Tweaker will use it when it needs to. Please make sure that the PSO2 Tweaker is named exactly ""PSO2 Tweaker.exe"".", MessageBoxIcon.Warning)
             End
         End If
-        File.Copy("PSO2 Tweaker.exe", "PSO2 Tweaker.donotdetectmegameguardsenpaipls", True)
+        File.Copy("PSO2 Tweaker.exe", "PSO2 Tweaker.donotnoticemegameguardsenpaipls", True)
         Do While Helper.IsFileInUse("PSO2 Tweaker.exe")
             Thread.Sleep(500)
         Loop
         File.Delete("PSO2 Tweaker.exe")
 
         Dim hWnd As IntPtr = External.FindWindow("Phantasy Star Online 2", Nothing)
-
+        NotifyIcon1.ShowBalloonTip(2000, "GN Shield", "GN Shield activated, Tweaker renamed, waiting for PSO2 to close!", ToolTipIcon.Info)
         tmrWaitingforPSO2.Enabled = True
 
         Do While hWnd = IntPtr.Zero
@@ -43,16 +74,47 @@ Public Class Form1
         tmrWaitingforPSO2.Enabled = False
 
         File.Copy(Pso2RootDir & "\pso2.exe", Pso2RootDir & "\pso2.exe_backup", True)
+        ThreadPool.QueueUserWorkItem(AddressOf CheckForPSO2, Nothing)
+    End Sub
+    Private Sub CheckForPSO2()
+        Dim Pso2RootDir As String = RegKey.GetValue(Of String)(RegKey.Pso2Dir)
         Do While Helper.IsFileInUse(Pso2RootDir & "\pso2.exe")
             Thread.Sleep(1000)
         Loop
         File.Copy(Pso2RootDir & "\pso2.exe_backup", Pso2RootDir & "\pso2.exe", True)
         File.Delete(Pso2RootDir & "\pso2.exe_backup")
-        File.Copy("PSO2 Tweaker.donotdetectmegameguardsenpaipls", "PSO2 Tweaker.exe", True)
-        Thread.Sleep(2000)
-        File.Delete("PSO2 Tweaker.donotdetectmegameguardsenpaipls")
-        Close()
+        Try
+            File.Copy("PSO2 Tweaker.donotnoticemegameguardsenpaipls", "PSO2 Tweaker.exe", True)
+            NotifyIcon1.ShowBalloonTip(2000, "GN Shield", "PSO2 closed, renaming Tweaker and disabling GN Shield. Goodbye!", ToolTipIcon.Info)
+            Thread.Sleep(2000)
+            File.Delete("PSO2 Tweaker.donotnoticemegameguardsenpaipls")
+            Close()
+        Catch ex As Exception
+            MsgBox("Error - " & ex.Message)
+        End Try
         End
+    End Sub
+
+    Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
+        Dim MsgBoxResultExit As MsgBoxResult = MsgBox("Are you sure you want to exit? This will NOT rename the Tweaker, and you'll have to manually rename it.", vbYesNo)
+        NotifyIcon1.ShowBalloonTip(2000, "GN Shield", "GN Shield is now offline.", ToolTipIcon.Info)
+        If MsgBoxResultExit = vbYes Then Close()
+    End Sub
+
+    Private Sub ToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem1.Click
+        Try
+            File.Copy("PSO2 Tweaker.donotnoticemegameguardsenpaipls", "PSO2 Tweaker.exe", True)
+            NotifyIcon1.ShowBalloonTip(2000, "GN Shield", "Renaming Tweaker and disabling GN Shield. Goodbye!", ToolTipIcon.Info)
+            Thread.Sleep(2000)
+            File.Delete("PSO2 Tweaker.donotnoticemegameguardsenpaipls")
+            Close()
+        Catch ex As Exception
+            MsgBox("Error - " & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub ToolStripMenuItem2_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem2.Click
+        MsgBox("The GN Field is a program meant to hide the PSO2 Tweaker from Gameguard. It does this (currently) by renaming the Tweaker after it's launched, to PSO2 Tweaker.donotnoticemegameguardsenpaipls instead of PSO2 Tweaker.exe. If you find your PSO2 Tweaker doesn't work after closing PSO2, please see if that renamed file is present, and rename it back.")
     End Sub
 End Class
 Public Class External
