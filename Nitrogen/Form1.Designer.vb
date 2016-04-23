@@ -43,7 +43,7 @@ Partial Class Form1
         '
         Me.NotifyIcon1.ContextMenuStrip = Me.ContextMenuStrip1
         Me.NotifyIcon1.Icon = CType(resources.GetObject("NotifyIcon1.Icon"), System.Drawing.Icon)
-        Me.NotifyIcon1.Text = "GN Shield"
+        Me.NotifyIcon1.Text = "GN Field"
         Me.NotifyIcon1.Visible = True
         '
         'ContextMenuStrip1
