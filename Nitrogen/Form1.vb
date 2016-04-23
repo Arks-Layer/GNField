@@ -19,15 +19,16 @@ Imports Microsoft.Win32
 
 Public Class Form1
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
         Dim asm As Assembly = Assembly.GetExecutingAssembly()
-        Dim fi As New FileInfo(asm.Location)
-        Me.Visible = False
-        Me.Hide()
-        Me.Opacity = 0
-        Me.ShowInTaskbar = False
-        Me.FormBorderStyle = FormBorderStyle.SizableToolWindow
-        ToolStripTextBox1.Text = "Built: " & fi.LastWriteTime.ToString.Replace("/2016", "/16")
-        Hide()
+            Dim fi As New FileInfo(asm.Location)
+            Me.Visible = False
+            Me.Hide()
+            Me.Opacity = 0
+            Me.ShowInTaskbar = False
+            Me.FormBorderStyle = FormBorderStyle.SizableToolWindow
+            ToolStripTextBox1.Text = "Built: " & fi.LastWriteTime.ToString.Replace("/2016", "/16")
+            Hide()
         If File.Exists("PSO2 Tweaker.donotdetectmegameguardsenpaipls") = True And File.Exists("PSO2 Tweaker.exe") = False Then
             NotifyIcon1.ShowBalloonTip(2000, "GN Field", "Found a renamed Tweaker, fixing it now!", ToolTipIcon.Info)
             Try
@@ -40,58 +41,63 @@ Public Class Form1
             End
         End If
         If File.Exists("PSO2 Tweaker.donotnoticemegameguardsenpaipls") = True And File.Exists("PSO2 Tweaker.exe") = False Then
-            NotifyIcon1.ShowBalloonTip(2000, "GN Field", "Found a renamed Tweaker, fixing it now!", ToolTipIcon.Info)
-            Try
-                File.Copy("PSO2 Tweaker.donotnoticemegameguardsenpaipls", "PSO2 Tweaker.exe", True)
-                Thread.Sleep(2000)
-                File.Delete("PSO2 Tweaker.donotnoticemegameguardsenpaipls")
-            Catch ex As Exception
-                MsgBox("Error - " & ex.Message)
-            End Try
-            End
-        End If
+                NotifyIcon1.ShowBalloonTip(2000, "GN Field", "Found a renamed Tweaker, fixing it now!", ToolTipIcon.Info)
+                Try
+                    File.Copy("PSO2 Tweaker.donotnoticemegameguardsenpaipls", "PSO2 Tweaker.exe", True)
+                    Thread.Sleep(2000)
+                    File.Delete("PSO2 Tweaker.donotnoticemegameguardsenpaipls")
+                Catch ex As Exception
+                    MsgBox("Error - " & ex.Message)
+                End Try
+                End
+            End If
         If File.Exists("PSO2 Tweaker.exe") = False Then
             MsgBox("GN Field establishment failed! Insufficient GN particles!" & vbCrLf & vbCrLf & "This program should not be run by itself, the PSO2 Tweaker will use it when it needs to. Please make sure that the PSO2 Tweaker is named exactly ""PSO2 Tweaker.exe"".", MessageBoxIcon.Warning)
             End
         End If
         File.Copy("PSO2 Tweaker.exe", "PSO2 Tweaker.donotnoticemegameguardsenpaipls", True)
-        Do While Helper.IsFileInUse("PSO2 Tweaker.exe")
-            Thread.Sleep(500)
-        Loop
-        File.Delete("PSO2 Tweaker.exe")
+            Do While Helper.IsFileInUse("PSO2 Tweaker.exe")
+                Thread.Sleep(500)
+            Loop
+            File.Delete("PSO2 Tweaker.exe")
 
-        Dim hWnd As IntPtr = External.FindWindow("Phantasy Star Online 2", Nothing)
-        NotifyIcon1.ShowBalloonTip(2000, "GN Field", "GN Field activated, Tweaker renamed, waiting for PSO2 to close!", ToolTipIcon.Info)
+            Dim hWnd As IntPtr = External.FindWindow("Phantasy Star Online 2", Nothing)
+            NotifyIcon1.ShowBalloonTip(2000, "GN Field", "GN Field activated, Tweaker renamed, waiting for PSO2 to close!", ToolTipIcon.Info)
         tmrWaitingforPSO2.Enabled = True
-
         Do While hWnd = IntPtr.Zero
-            hWnd = External.FindWindow("Phantasy Star Online 2", Nothing)
-            Thread.Sleep(10)
-            Application.DoEvents()
-        Loop
-        Dim Pso2RootDir As String = RegKey.GetValue(Of String)(RegKey.Pso2Dir)
-        Helper.DeleteFile(Pso2RootDir & "\ddraw.dll")
-        tmrWaitingforPSO2.Enabled = False
+                hWnd = External.FindWindow("Phantasy Star Online 2", Nothing)
+                Thread.Sleep(10)
+                Application.DoEvents()
+            Loop
+            Dim Pso2RootDir As String = RegKey.GetValue(Of String)(RegKey.Pso2Dir)
+            Helper.DeleteFile(Pso2RootDir & "\ddraw.dll")
+            tmrWaitingforPSO2.Enabled = False
 
-        File.Copy(Pso2RootDir & "\pso2.exe", Pso2RootDir & "\pso2.exe_backup", True)
+            File.Copy(Pso2RootDir & "\pso2.exe", Pso2RootDir & "\pso2.exe_backup", True)
         ThreadPool.QueueUserWorkItem(AddressOf CheckForPSO2, Nothing)
+        End
     End Sub
     Private Sub CheckForPSO2()
-        Dim Pso2RootDir As String = RegKey.GetValue(Of String)(RegKey.Pso2Dir)
-        Do While Helper.IsFileInUse(Pso2RootDir & "\pso2.exe")
-            Thread.Sleep(1000)
-        Loop
-        File.Copy(Pso2RootDir & "\pso2.exe_backup", Pso2RootDir & "\pso2.exe", True)
-        File.Delete(Pso2RootDir & "\pso2.exe_backup")
         Try
-            File.Copy("PSO2 Tweaker.donotnoticemegameguardsenpaipls", "PSO2 Tweaker.exe", True)
-            NotifyIcon1.ShowBalloonTip(2000, "GN Field", "PSO2 closed, renaming Tweaker and disabling GN Field. Goodbye!", ToolTipIcon.Info)
-            Thread.Sleep(2000)
-            File.Delete("PSO2 Tweaker.donotnoticemegameguardsenpaipls")
-            Close()
+            Dim Pso2RootDir As String = RegKey.GetValue(Of String)(RegKey.Pso2Dir)
+            Do While Helper.IsFileInUse(Pso2RootDir & "\pso2.exe")
+                Thread.Sleep(1000)
+            Loop
+            File.Copy(Pso2RootDir & "\pso2.exe_backup", Pso2RootDir & "\pso2.exe", True)
+            File.Delete(Pso2RootDir & "\pso2.exe_backup")
+            Try
+                File.Copy("PSO2 Tweaker.donotnoticemegameguardsenpaipls", "PSO2 Tweaker.exe", True)
+                NotifyIcon1.ShowBalloonTip(2000, "GN Field", "PSO2 closed, renaming Tweaker and disabling GN Field. Goodbye!", ToolTipIcon.Info)
+                Thread.Sleep(2000)
+                File.Delete("PSO2 Tweaker.donotnoticemegameguardsenpaipls")
+                Close()
+            Catch ex As Exception
+                MsgBox("Error - " & ex.Message)
+            End Try
         Catch ex As Exception
             MsgBox("Error - " & ex.Message)
         End Try
+        End
         End
     End Sub
 
