@@ -74,14 +74,14 @@ Public Class Form1
         tmrWaitingforPSO2.Enabled = False
         File.Copy(Pso2RootDir & "\pso2.exe", Pso2RootDir & "\pso2.exe_backup", True)
 
-        MsgBox("Test 2")
+
         Try
             Do While Helper.IsFileInUse(Pso2RootDir & "\pso2.exe")
                 Thread.Sleep(1000)
                 'Probably the worst way to do this ever of all time [AIDA]
                 Application.DoEvents()
             Loop
-            MsgBox("Test 3")
+
             File.Copy(Pso2RootDir & "\pso2.exe_backup", Pso2RootDir & "\pso2.exe", True)
             File.Delete(Pso2RootDir & "\pso2.exe_backup")
             Try
