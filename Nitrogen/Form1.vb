@@ -71,18 +71,17 @@ Public Class Form1
             Loop
             Dim Pso2RootDir As String = RegKey.GetValue(Of String)(RegKey.Pso2Dir)
             Helper.DeleteFile(Pso2RootDir & "\ddraw.dll")
-            tmrWaitingforPSO2.Enabled = False
+        tmrWaitingforPSO2.Enabled = False
+        File.Copy(Pso2RootDir & "\pso2.exe", Pso2RootDir & "\pso2.exe_backup", True)
 
-            File.Copy(Pso2RootDir & "\pso2.exe", Pso2RootDir & "\pso2.exe_backup", True)
-        ThreadPool.QueueUserWorkItem(AddressOf CheckForPSO2, Nothing)
-        End
-    End Sub
-    Private Sub CheckForPSO2()
+        MsgBox("Test 2")
         Try
-            Dim Pso2RootDir As String = RegKey.GetValue(Of String)(RegKey.Pso2Dir)
             Do While Helper.IsFileInUse(Pso2RootDir & "\pso2.exe")
                 Thread.Sleep(1000)
+                'Probably the worst way to do this ever of all time [AIDA]
+                Application.DoEvents()
             Loop
+            MsgBox("Test 3")
             File.Copy(Pso2RootDir & "\pso2.exe_backup", Pso2RootDir & "\pso2.exe", True)
             File.Delete(Pso2RootDir & "\pso2.exe_backup")
             Try
