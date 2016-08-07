@@ -44,7 +44,6 @@ Public Class Form1
             End Try
             End
         End If
-        Log("")
         If File.Exists("PSO2 Tweaker.donotnoticemegameguardsenpaipls") = True And File.Exists("PSO2 Tweaker.exe") = False Then
                 NotifyIcon1.ShowBalloonTip(2000, "GN Field", "Found a renamed Tweaker, fixing it now!", ToolTipIcon.Info)
             Try
