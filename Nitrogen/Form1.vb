@@ -35,13 +35,13 @@ Public Class Form1
         NotifyIcon1.ShowBalloonTip(2000, "GN Field", "Waiting for the Tweaker to fully close... (Step 1)", ToolTipIcon.Info)
         Do While Helper.IsFileInUse("PSO2 Tweaker.exe")
             'Probably the worst way to do this ever of all time [AIDA]
+            Thread.Sleep(5000)
             If Process.GetProcessesByName("PSO2 Tweaker").Length > 0 Then
-                Log("Closing Tweaker process!")
+                Log("Tweaker took to long, closing Tweaker process!")
                 For Each proc As Process In Process.GetProcessesByName("PSO2 Tweaker")
                     proc.Kill()
                 Next
             End If
-            Thread.Sleep(1000)
             Application.DoEvents()
         Loop
         If File.Exists("PSO2 Tweaker.donotdetectmegameguardsenpaipls") = True Then
