@@ -37,7 +37,7 @@ Public Class Form1
             'Probably the worst way to do this ever of all time [AIDA]
             Thread.Sleep(5000)
             If Process.GetProcessesByName("PSO2 Tweaker").Length > 0 Then
-                Log("Tweaker took to long, closing Tweaker process!")
+                Log("Tweaker took too long, closing Tweaker process!")
                 For Each proc As Process In Process.GetProcessesByName("PSO2 Tweaker")
                     proc.Kill()
                 Next
