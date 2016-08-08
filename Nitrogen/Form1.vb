@@ -19,7 +19,7 @@ Imports Microsoft.Win32
 
 Public Class Form1
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
+        Dim Pso2RootDir As String = RegKey.GetValue(Of String)(RegKey.Pso2Dir)
         Dim asm As Assembly = Assembly.GetExecutingAssembly()
             Dim fi As New FileInfo(asm.Location)
             Me.Visible = False
@@ -31,7 +31,14 @@ Public Class Form1
         Hide()
         If File.Exists("gnfieldlog.txt") Then File.Delete("gnfieldlog.txt")
         Log("Checking for renamed Tweakers.")
-        If File.Exists("PSO2 Tweaker.donotdetectmegameguardsenpaipls") = True And File.Exists("PSO2 Tweaker.exe") = False Then
+        Log("Waiting for PSO2 Tweaker to close...")
+        NotifyIcon1.ShowBalloonTip(2000, "GN Field", "Waiting for the Tweaker to fully close... (Step 1)", ToolTipIcon.Info)
+        Do While Helper.IsFileInUse("PSO2 Tweaker.exe")
+            Thread.Sleep(1000)
+            'Probably the worst way to do this ever of all time [AIDA]
+            Application.DoEvents()
+        Loop
+        If File.Exists("PSO2 Tweaker.donotdetectmegameguardsenpaipls") = True Then
             NotifyIcon1.ShowBalloonTip(2000, "GN Field", "Found a renamed Tweaker, fixing it now!", ToolTipIcon.Info)
             Try
                 Log("Renaming a donotdetect Tweaker.")
@@ -44,8 +51,8 @@ Public Class Form1
             End Try
             End
         End If
-        If File.Exists("PSO2 Tweaker.donotnoticemegameguardsenpaipls") = True And File.Exists("PSO2 Tweaker.exe") = False Then
-                NotifyIcon1.ShowBalloonTip(2000, "GN Field", "Found a renamed Tweaker, fixing it now!", ToolTipIcon.Info)
+        If File.Exists("PSO2 Tweaker.donotnoticemegameguardsenpaipls") = True Then
+            NotifyIcon1.ShowBalloonTip(2000, "GN Field", "Found a renamed Tweaker, fixing it now!", ToolTipIcon.Info)
             Try
                 Log("Renaming a donotnotice Tweaker.")
                 File.Copy("PSO2 Tweaker.donotnoticemegameguardsenpaipls", "PSO2 Tweaker.exe", True)
@@ -54,23 +61,27 @@ Public Class Form1
                 File.Delete("PSO2 Tweaker.donotnoticemegameguardsenpaipls")
             Catch ex As Exception
                 MsgBox("Error - " & ex.Message)
-                End Try
-                End
-            End If
+            End Try
+            End
+        End If
         If File.Exists("PSO2 Tweaker.exe") = False Then
             MsgBox("GN Field establishment failed! Insufficient GN particles!" & vbCrLf & vbCrLf & "This program should not be run by itself, the PSO2 Tweaker will use it when it needs to. Please make sure that the PSO2 Tweaker is named exactly ""PSO2 Tweaker.exe"".", MessageBoxIcon.Warning)
             End
         End If
         Log("Trying to copy vanilla tweaker to donotnotice")
         File.Copy("PSO2 Tweaker.exe", "PSO2 Tweaker.donotnoticemegameguardsenpaipls", True)
-        Do While Helper.IsFileInUse("PSO2 Tweaker.exe")
-            Thread.Sleep(500)
-        Loop
         Log("Deleting original Tweaker")
         File.Delete("PSO2 Tweaker.exe")
 
-            Dim hWnd As IntPtr = External.FindWindow("Phantasy Star Online 2", Nothing)
-            NotifyIcon1.ShowBalloonTip(2000, "GN Field", "GN Field activated, Tweaker renamed, waiting for PSO2 to close!", ToolTipIcon.Info)
+        Dim startInfo As ProcessStartInfo = New ProcessStartInfo With {.FileName = (Pso2RootDir & "\pso2.exe"), .Arguments = "+0x33aca2b9", .UseShellExecute = False}
+        startInfo.EnvironmentVariables("-pso2") = "+0x01e3f1e9"
+        Dim shell As Process = New Process With {.StartInfo = startInfo}
+
+        Log("Starting PSO2 from GN Field!")
+        shell.Start()
+
+        Dim hWnd As IntPtr = External.FindWindow("Phantasy Star Online 2", Nothing)
+        NotifyIcon1.ShowBalloonTip(2000, "GN Field", "GN Field activated, Tweaker renamed, launching PSO2! (Step 2)", ToolTipIcon.Info)
         tmrWaitingforPSO2.Enabled = True
         Log("Waiting for PSO2 to start")
         Do While hWnd = IntPtr.Zero
@@ -79,11 +90,10 @@ Public Class Form1
             Application.DoEvents()
         Loop
         Log("PSO2 started!")
-        Dim Pso2RootDir As String = RegKey.GetValue(Of String)(RegKey.Pso2Dir)
-            Helper.DeleteFile(Pso2RootDir & "\ddraw.dll")
+
+        Helper.DeleteFile(Pso2RootDir & "\ddraw.dll")
         tmrWaitingforPSO2.Enabled = False
         File.Copy(Pso2RootDir & "\pso2.exe", Pso2RootDir & "\pso2.exe_backup", True)
-
 
         Try
             Log("Waiting for PSO2 to close...")
@@ -98,7 +108,7 @@ Public Class Form1
             Try
                 Log("Renaming from donotnotice to vanilla")
                 File.Copy("PSO2 Tweaker.donotnoticemegameguardsenpaipls", "PSO2 Tweaker.exe", True)
-                NotifyIcon1.ShowBalloonTip(2000, "GN Field", "PSO2 closed, renaming Tweaker and disabling GN Field. Goodbye!", ToolTipIcon.Info)
+                NotifyIcon1.ShowBalloonTip(2000, "GN Field", "PSO2 closed, renaming Tweaker and disabling GN Field. (Step 3) Goodbye!", ToolTipIcon.Info)
                 Thread.Sleep(2000)
                 Log("Deleteing donotnotice Tweaker")
                 File.Delete("PSO2 Tweaker.donotnoticemegameguardsenpaipls")
